@@ -4,9 +4,9 @@
 #define MOTOR_INTERFACE_TYPE 4
 
 // Nota el orden de pines: 1, 3, 2, 4
-AccelStepper stepper_unidad(MOTOR_INTERFACE_TYPE, 30, 32, 31, 33); // poner reversa
+AccelStepper stepper_unidad(MOTOR_INTERFACE_TYPE, 30, 32, 31, 33);  // poner reversa
 AccelStepper stepper_decena(MOTOR_INTERFACE_TYPE, 40, 42, 41, 43);
-AccelStepper stepper_centena(MOTOR_INTERFACE_TYPE, 50, 52, 51, 53);
+AccelStepper stepper_centena(MOTOR_INTERFACE_TYPE, 50, 52, 51, 53); // poner reversa
 
 const float PASOS_POR_VUELTA = 2048.0;
 
@@ -46,8 +46,10 @@ void loop() {
 }
 
 void moverTresCifras(int destino){
-  Serial.print("el destino es: ");
-  Serial.println(destino);
+  Serial.println("");
+  Serial.print("/***** el destino es: ");
+  Serial.print(destino);
+  Serial.println(" *****\ ");
 
   int unidad = destino % 10;
   destino = destino / 10;
@@ -62,17 +64,17 @@ void moverTresCifras(int destino){
   Serial.println(centena);
 
   Serial.println(" ----- inicio mov unidad ----- ");
-  moverAPaleta(unidad, stepper_unidad, true, unidad_actual, 0);
+  moverAPaleta(unidad, stepper_unidad, true, unidad_actual);
   Serial.println(" ----- fin mov unidad ----- ");
   Serial.println(" ----- inicio mov decena ----- ");
-  moverAPaleta(decena, stepper_decena, false, decena_actual, 1);
+  moverAPaleta(decena, stepper_decena, false, decena_actual);
   Serial.println(" ----- fin mov decena ----- ");
   Serial.println(" ----- inicio mov centena ----- ");
-  moverAPaleta(centena, stepper_centena, true, centena_actual, 2);
+  moverAPaleta(centena, stepper_centena, true, centena_actual);
   Serial.println(" ----- fin mov centena ----- ");
 }
 
-void moverAPaleta(int destino, AccelStepper stepper, bool reversa, int &actual, int vueltas_extra) {
+void moverAPaleta(int destino, AccelStepper stepper, bool reversa, int &actual) {
   
   if(destino < 0 || destino > 15){
     Serial.println("nro fuera de rango :(");
@@ -85,7 +87,7 @@ void moverAPaleta(int destino, AccelStepper stepper, bool reversa, int &actual, 
     int saltos = (destino - actual + CANTIDAD_PALETAS) % CANTIDAD_PALETAS;
 
     // 2. Convertir saltos a pasos de motor
-    long pasos_a_mover = (saltos * pasos_por_paleta) + (PASOS_POR_VUELTA * vueltas_extra);
+    long pasos_a_mover = (saltos * pasos_por_paleta);
 
     // 3. Mover
     if (pasos_a_mover > 0) {
