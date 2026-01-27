@@ -3,6 +3,14 @@
 // Definir tipo de motor (4 cables = FULL4WIRE)
 #define MOTOR_INTERFACE_TYPE 4
 
+// set up de los sensores magneticos
+const int reedUnidad = 22;
+int reedUnidadEstado;
+const int reedDecena = 5;
+int reedDecenaEstado;
+const int reedCentena = 5;
+int reedCentenaEstado;
+
 // Nota el orden de pines: 1, 3, 2, 4
 AccelStepper stepper_unidad(MOTOR_INTERFACE_TYPE, 30, 32, 31, 33);  // poner reversa
 AccelStepper stepper_decena(MOTOR_INTERFACE_TYPE, 40, 42, 41, 43);
@@ -24,27 +32,45 @@ int centena_actual = 0;
 
 void setup() {
   Serial.begin(9600);
+  pinMode(reedUnidad, INPUT);
   // configuracion motores
   stepper_unidad.setMaxSpeed(1000);
   stepper_unidad.setAcceleration(500);
-  stepper_unidad.setSpeed(200);
+  stepper_unidad.setSpeed(-200);
   stepper_decena.setMaxSpeed(1000);
   stepper_decena.setAcceleration(500);
   stepper_decena.setSpeed(200);
   stepper_centena.setMaxSpeed(1000);
   stepper_centena.setAcceleration(500);
-  stepper_centena.setSpeed(200);
+  stepper_centena.setSpeed(-200);
 
   randomSeed(analogRead(A0));
 }
 
 void loop() {
+  moverTresCifras(random(100, 999));
   delay(1000);
-  int rand_int = random(100, 999);
-  moverTresCifras(rand_int);
-  
+  /*stepper_unidad.runSpeed();
+  stepper_decena.runSpeed();
+  stepper_centena.runSpeed();*/
+  /*
+  for(int i = 0; i <=15; i++){
+    moverAPaleta(i, stepper_unidad, true, unidad_actual);
+    if (revisarReed(reedUnidad, reedUnidadEstado)) {
+      Serial.println("tamo activo");
+      delay(1000);
+    } else{
+      Serial.println("no tamo activo");
+    }
+    delay(500);
+  }
+  */
 }
-
+boolean revisarReed(int reed, int &reedEstado){
+  reedEstado = digitalRead(reed);
+  if (reedEstado == HIGH) return true;
+  else return false;
+}
 void moverTresCifras(int destino){
   Serial.println("");
   Serial.print("/***** el destino es: ");
@@ -55,13 +81,14 @@ void moverTresCifras(int destino){
   destino = destino / 10;
   int decena = destino % 10;
   int centena = destino / 10;
-/*
+  /*
   Serial.print("la unidad es: ");
   Serial.println(unidad);
   Serial.print("la decena es: ");
   Serial.println(decena);
   Serial.print("la centena es: ");
-  Serial.println(centena);*/
+  Serial.println(centena);
+  */
 
   Serial.println(" ----- inicio mov unidad ----- ");
   moverAPaleta(unidad, stepper_unidad, true, unidad_actual);
@@ -87,7 +114,7 @@ void moverAPaleta(int destino, AccelStepper stepper, bool reversa, int &actual) 
     int saltos = (destino - actual + CANTIDAD_PALETAS) % CANTIDAD_PALETAS;
 
     // 2. Convertir saltos a pasos de motor
-    long pasos_a_mover = (saltos * pasos_por_paleta);
+    long pasos_a_mover = saltos * pasos_por_paleta;
 
     // 3. Mover
     if (pasos_a_mover > 0) {
