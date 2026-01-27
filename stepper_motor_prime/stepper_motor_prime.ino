@@ -55,13 +55,13 @@ void moverTresCifras(int destino){
   destino = destino / 10;
   int decena = destino % 10;
   int centena = destino / 10;
-
+/*
   Serial.print("la unidad es: ");
   Serial.println(unidad);
   Serial.print("la decena es: ");
   Serial.println(decena);
   Serial.print("la centena es: ");
-  Serial.println(centena);
+  Serial.println(centena);*/
 
   Serial.println(" ----- inicio mov unidad ----- ");
   moverAPaleta(unidad, stepper_unidad, true, unidad_actual);
@@ -77,7 +77,7 @@ void moverTresCifras(int destino){
 void moverAPaleta(int destino, AccelStepper stepper, bool reversa, int &actual) {
   
   if(destino < 0 || destino > 15){
-    Serial.println("nro fuera de rango :(");
+    Serial.println("nro fuera de rango :");
     return;
   } else {
     Serial.print("inicia en posicion: ");
