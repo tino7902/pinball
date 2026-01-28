@@ -4,8 +4,10 @@
 #define MOTOR_INTERFACE_TYPE 4
 
 // set up de los sensores hall
-const int pinHallUnidad = A5;
+const int pinHallUnidad = A1;
 int valorHallUnidad;
+const int pinHallCentena = A2;
+int valorHallCentena;
 
 // Nota el orden de pines: 1, 3, 2, 4
 AccelStepper stepper_unidad(MOTOR_INTERFACE_TYPE, 30, 32, 31, 33);  // poner reversa
@@ -43,42 +45,31 @@ void setup() {
 }
 
 void loop() {
-  //moverTresCifras(random(100, 999));
-  //delay(1000);
-  /*stepper_unidad.runSpeed();
-  stepper_decena.runSpeed();
-  stepper_centena.runSpeed();
-  */
-
-  /* for(int i = 0; i <=15; i++){
-    moverAPaleta(i, stepper_unidad, true, unidad_actual);
-    valorHallUnidad = analogRead(pinHallUnidad);
-    Serial.print("valor hall: ");
-    Serial.println(valorHallUnidad);
-    delay(1000);
-  } */
-  moverACero(stepper_unidad, unidad_actual, valorHallUnidad);
+  //moverACero(stepper_unidad, unidad_actual, valorHallUnidad, "unidad", pinHallUnidad, true);
+  moverACero(stepper_centena, centena_actual, valorHallCentena, "centena", pinHallCentena, false);
 }
+
+void moverACero(AccelStepper &stepper, int &actual, int &valorHall, String nombre, int pinHall, bool reversa) {
+
+  valorHall = analogRead(pinHall);
+  Serial.print("valor hall ");
+  Serial.print(nombre);
+  Serial.print(": ");
+  Serial.println(valorHall);
+  if (valorHall > 10) {
+    moverUnaPaleta(stepper, actual, reversa);
+  } else {
+    stepper.stop();
+    actual = 0;
+  }
+}
+
 boolean revisarReed(int reed, int &reedEstado) {
   reedEstado = digitalRead(reed);
   if (reedEstado == HIGH) return true;
   else return false;
 }
 
-void moverACero(AccelStepper stepper, int &actual, int &valorHall) {
-  while (true) {
-    valorHall = analogRead(pinHallUnidad);
-    Serial.print("valor hall: ");
-    Serial.println(valorHall);
-    if (valorHall > 10) {
-      stepper_unidad.runSpeed();
-    } else {
-      stepper.stop();
-      actual = 0;
-      break;
-    }
-  }
-}
 void moverTresCifras(int destino) {
   Serial.println("");
   Serial.print("/***** el destino es: ");
@@ -109,7 +100,7 @@ void moverTresCifras(int destino) {
   Serial.println(" ----- fin mov centena ----- ");
 }
 
-void moverAPaleta(int destino, AccelStepper stepper, bool reversa, int &actual) {
+void moverAPaleta(int destino, AccelStepper &stepper, bool reversa, int &actual) {
 
   if (destino < 0 || destino > 15) {
     Serial.println("nro fuera de rango :");
@@ -140,5 +131,15 @@ void moverAPaleta(int destino, AccelStepper stepper, bool reversa, int &actual) 
 
     Serial.print("posicion: ");
     Serial.println(destino);
+  }
+}
+
+void moverUnaPaleta(AccelStepper &stepper, int &actual, bool reversa){
+  if(reversa){
+    stepper.move(pasos_por_paleta);
+    stepper.runToPosition();
+  } else{
+    stepper.move(-pasos_por_paleta);
+    stepper.runSpeedToPosition();
   }
 }
